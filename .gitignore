@@ -9,3 +9,4 @@ typechain-types
 .turbo
 coverage
 deployments.json
+dex-deployments.json
