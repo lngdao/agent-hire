@@ -1,0 +1,24 @@
+{
+  "name": "@agenthire/personal-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:simple": "node dist/simple.js",
+    "dev": "ts-node src/index.ts",
+    "dev:simple": "ts-node src/simple.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@agenthire/sdk": "workspace:*",
+    "ethers": "^6.13.0",
+    "dotenv": "^16.4.0",
+    "openai": "^4.60.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
