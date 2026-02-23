@@ -274,7 +274,7 @@ AgentHire SDK can be integrated into **any JS/TS-based agent platform** as a plu
 
 ## 📄 Documentation
 
-- [Full Spec (spec.md)](./spec.md) — Detailed technical specification
+- [Full Spec (spec.md)](./SPECS.md) — Detailed technical specification
 
 ---
 
