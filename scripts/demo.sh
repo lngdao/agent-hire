@@ -15,6 +15,16 @@ if [ ! -f "$ROOT_DIR/packages/contracts/deployments.json" ]; then
   exit 1
 fi
 
+# Check if DEX contracts are deployed
+if [ ! -f "$ROOT_DIR/packages/contracts/dex-deployments.json" ]; then
+  echo "Warning: dex-deployments.json not found."
+  echo "SwapBot will not have DEX contracts configured."
+  echo "Deploy DEX contracts with:"
+  echo "  cd packages/contracts"
+  echo "  npx hardhat run scripts/deploy-dex.ts --network baseSepolia"
+  echo ""
+fi
+
 echo "Starting demo components..."
 echo ""
 echo "Press Ctrl+C to stop all components."

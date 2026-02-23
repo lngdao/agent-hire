@@ -1,0 +1,19 @@
+{
+  "name": "@agenthire/openclaw-skill",
+  "version": "0.1.0",
+  "description": "OpenClaw skill for AgentHire — Agent-to-Agent marketplace",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@agenthire/sdk": "workspace:*",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}

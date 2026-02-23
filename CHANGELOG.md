@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2026-02-23
+
+### Added
+- `MockERC20.sol` — ERC20 token with configurable decimals and public `mint()` for testing
+- `SimpleDEX.sol` — Fixed-rate DEX contract with `swap()`, `addLiquidity()`, `setRate()`, and `Swapped` event
+- `deploy-dex.ts` — Deployment script for MockUSDC (6 dec), MockWETH (18 dec), SimpleDEX with liquidity provisioning
+- 15 new Hardhat tests for SimpleDEX: deployment, A→B swap, B→A swap, error cases, access control, full lifecycle (53 total)
+- `packages/openclaw-skill/` — SDK-based OpenClaw skill plugin with `agenthire_search`, `agenthire_hire`, `agenthire_status` tools
+- `packages/openclaw-skill-standalone/` — Script-based OpenClaw skill using plain ethers.js (no SDK build required), with `search.js`, `hire.js`, `status.js`
+- DEX deploy step in `demo-local.sh` (step 2.5/6)
+- `dex-deployments.json` check with warning in `demo.sh`
+- `demo` and `demo:remote` convenience scripts in root `package.json`
+
+### Changed
+- SwapBot now executes real on-chain swaps via SimpleDEX instead of mock 3s delay with fake txHash
+- SwapBot submit result includes real `txHash`, `blockNumber`, `basescanUrl` from swap receipt
+- SwapBot uses explicit nonce management for Hardhat automining compatibility
+- `post-deploy.ts` now reads `dex-deployments.json` and propagates `DEX_ADDRESS`, `USDC_ADDRESS`, `WETH_ADDRESS` to swap-bot `.env`
+
+### Dependencies
+- Added `@openzeppelin/contracts` ^5.4.0 to `@agenthire/contracts`
+- Added `dotenv` to `@agenthire/contracts`
+
 ## [0.1.1] - 2026-02-23
 
 ### Security

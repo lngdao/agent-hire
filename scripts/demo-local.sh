@@ -21,16 +21,20 @@ HH_PID=$!
 sleep 4
 
 # Step 2: Deploy contracts
-echo "[2/5] Deploying contracts..."
+echo "[2/6] Deploying contracts..."
 npx hardhat run scripts/deploy.ts --network localhost
 
+# Step 2.5: Deploy DEX contracts
+echo "[2.5/6] Deploying DEX contracts..."
+npx hardhat run scripts/deploy-dex.ts --network localhost
+
 # Step 3: Propagate addresses
-echo "[3/5] Propagating contract addresses..."
+echo "[3/6] Propagating contract addresses..."
 cd "$ROOT_DIR"
 $TSNODE scripts/post-deploy.ts
 
-# Step 4: Write private keys to .env files
-echo "[4/5] Writing private keys..."
+# Step 4: Write private keys
+echo "[4/6] Writing private keys..."
 
 update_env_key() {
   local envfile="$1"
@@ -47,7 +51,7 @@ update_env_key "$ROOT_DIR/agents/swap-bot/.env" "PRIVATE_KEY" "$SWAPBOT_KEY"
 update_env_key "$ROOT_DIR/agents/personal-assistant/.env" "PRIVATE_KEY" "$ASSISTANT_KEY"
 
 echo ""
-echo "[5/5] Starting agents..."
+echo "[5/6] Starting agents..."
 echo "======================================"
 echo ""
 echo "  Dashboard:  http://localhost:3000"

@@ -10,6 +10,7 @@ import * as path from "path";
 
 const ROOT = path.resolve(__dirname, "..");
 const deploymentsPath = path.join(ROOT, "packages", "contracts", "deployments.json");
+const dexDeploymentsPath = path.join(ROOT, "packages", "contracts", "dex-deployments.json");
 
 if (!fs.existsSync(deploymentsPath)) {
   console.error("deployments.json not found. Deploy contracts first.");
@@ -27,6 +28,23 @@ const rpcUrl =
 
 console.log(`ServiceRegistry: ${ServiceRegistry}`);
 console.log(`JobEscrow: ${JobEscrow}`);
+
+// Read DEX deployments if available
+let dexVars: Record<string, string> = {};
+if (fs.existsSync(dexDeploymentsPath)) {
+  const dexDeployments = JSON.parse(fs.readFileSync(dexDeploymentsPath, "utf-8"));
+  const { SimpleDEX, MockUSDC, MockWETH } = dexDeployments.contracts;
+  dexVars = {
+    DEX_ADDRESS: SimpleDEX,
+    USDC_ADDRESS: MockUSDC,
+    WETH_ADDRESS: MockWETH,
+  };
+  console.log(`SimpleDEX: ${SimpleDEX}`);
+  console.log(`MockUSDC: ${MockUSDC}`);
+  console.log(`MockWETH: ${MockWETH}`);
+} else {
+  console.log("dex-deployments.json not found — skipping DEX address propagation.");
+}
 
 function writeEnv(dir: string, vars: Record<string, string>) {
   const envPath = path.join(dir, ".env");
@@ -61,6 +79,7 @@ writeEnv(path.join(ROOT, "agents", "swap-bot"), {
   RPC_URL: rpcUrl,
   REGISTRY_ADDRESS: ServiceRegistry,
   ESCROW_ADDRESS: JobEscrow,
+  ...dexVars,
 });
 
 // PersonalAssistant

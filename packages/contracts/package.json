@@ -7,13 +7,19 @@
     "test": "hardhat test",
     "clean": "hardhat clean && rm -rf dist",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
-    "deploy:base-sepolia": "hardhat run scripts/deploy.ts --network baseSepolia"
+    "deploy:base-sepolia": "hardhat run scripts/deploy.ts --network baseSepolia",
+    "deploy-dex:local": "hardhat run scripts/deploy-dex.ts --network localhost",
+    "deploy-dex:base-sepolia": "hardhat run scripts/deploy-dex.ts --network baseSepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20.0.0",
     "hardhat": "^2.22.0",
-    "typescript": "^5.4.0",
     "ts-node": "^10.9.0",
-    "@types/node": "^20.0.0"
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^16.4.0"
   }
 }

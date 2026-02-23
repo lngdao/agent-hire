@@ -8,7 +8,9 @@
     "dev": "turbo dev",
     "test": "turbo test",
     "clean": "turbo clean",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "demo": "bash scripts/demo-local.sh",
+    "demo:remote": "bash scripts/demo.sh"
   },
   "devDependencies": {
     "ts-node": "^10.9.0",
