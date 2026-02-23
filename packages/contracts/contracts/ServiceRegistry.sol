@@ -17,6 +17,8 @@ contract ServiceRegistry {
     }
 
     uint256 public nextServiceId = 1;
+    address public owner;
+    address public escrow;
 
     mapping(uint256 => Service) public services;
     mapping(address => uint256[]) public providerServices;
@@ -25,6 +27,23 @@ contract ServiceRegistry {
     event ServiceRegistered(uint256 indexed id, address indexed provider, string name, uint256 pricePerJob);
     event ServiceUpdated(uint256 indexed id, string name, uint256 pricePerJob);
     event ServiceDeactivated(uint256 indexed id);
+    event EscrowSet(address indexed escrow);
+
+    modifier onlyEscrow() {
+        require(msg.sender == escrow, "Only escrow");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function setEscrow(address _escrow) external {
+        require(msg.sender == owner, "Only owner");
+        require(_escrow != address(0), "Zero address");
+        escrow = _escrow;
+        emit EscrowSet(_escrow);
+    }
 
     function registerService(
         string calldata _name,
@@ -109,11 +128,11 @@ contract ServiceRegistry {
         return providerServices[_provider];
     }
 
-    function incrementJobCount(uint256 _id) external {
+    function incrementJobCount(uint256 _id) external onlyEscrow {
         services[_id].totalJobs++;
     }
 
-    function addRating(uint256 _id, uint256 _rating) external {
+    function addRating(uint256 _id, uint256 _rating) external onlyEscrow {
         require(_rating >= 1 && _rating <= 5, "Rating must be 1-5");
         services[_id].totalRating += _rating;
         services[_id].ratingCount++;

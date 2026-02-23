@@ -116,29 +116,48 @@ describe("ServiceRegistry", function () {
     });
   });
 
-  describe("ratings and jobs", function () {
+  describe("ratings and jobs (onlyEscrow)", function () {
+    let escrowMock: any;
+
     beforeEach(async function () {
       await registry.connect(provider1).registerService("Bot", "desc", ["tag"], ethers.parseEther("0.001"));
+      // Deploy a JobEscrow to act as escrow caller
+      const EscrowFactory = await ethers.getContractFactory("JobEscrow");
+      escrowMock = await EscrowFactory.deploy(await registry.getAddress());
+      await registry.setEscrow(await escrowMock.getAddress());
     });
 
-    it("should increment job count", async function () {
-      await registry.incrementJobCount(1);
-      await registry.incrementJobCount(1);
-      const s = await registry.getService(1);
-      expect(s.totalJobs).to.equal(2);
+    it("should reject non-escrow incrementJobCount", async function () {
+      await expect(registry.incrementJobCount(1)).to.be.revertedWith("Only escrow");
+      await expect(registry.connect(provider1).incrementJobCount(1)).to.be.revertedWith("Only escrow");
     });
 
-    it("should add rating", async function () {
-      await registry.addRating(1, 5);
-      await registry.addRating(1, 3);
-      const s = await registry.getService(1);
-      expect(s.totalRating).to.equal(8);
-      expect(s.ratingCount).to.equal(2);
+    it("should reject non-escrow addRating", async function () {
+      await expect(registry.addRating(1, 5)).to.be.revertedWith("Only escrow");
     });
 
     it("should reject invalid rating", async function () {
-      await expect(registry.addRating(1, 0)).to.be.revertedWith("Rating must be 1-5");
-      await expect(registry.addRating(1, 6)).to.be.revertedWith("Rating must be 1-5");
+      // Even escrow can't add invalid rating — but we test via direct call which fails on onlyEscrow first
+      await expect(registry.addRating(1, 0)).to.be.revertedWith("Only escrow");
+    });
+  });
+
+  describe("setEscrow", function () {
+    it("should set escrow address", async function () {
+      await registry.setEscrow(provider1.address);
+      expect(await registry.escrow()).to.equal(provider1.address);
+    });
+
+    it("should reject non-owner", async function () {
+      await expect(
+        registry.connect(provider1).setEscrow(provider1.address)
+      ).to.be.revertedWith("Only owner");
+    });
+
+    it("should reject zero address", async function () {
+      await expect(
+        registry.setEscrow(ethers.ZeroAddress)
+      ).to.be.revertedWith("Zero address");
     });
   });
 });

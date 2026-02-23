@@ -23,9 +23,12 @@ contract JobEscrow {
 
     uint256 public constant CONSUMER_CANCEL_TIMEOUT = 1 hours;
     uint256 public constant PROVIDER_CLAIM_TIMEOUT = 24 hours;
+    uint256 public constant PROTOCOL_FEE_BPS = 200; // 2% = 200 basis points
 
     ServiceRegistry public registry;
+    address public feeRecipient;
     uint256 public nextJobId = 1;
+    uint256 public totalFeesCollected;
 
     mapping(uint256 => Job) public jobs;
     mapping(address => uint256[]) public consumerJobs;
@@ -33,12 +36,13 @@ contract JobEscrow {
 
     event JobCreated(uint256 indexed id, uint256 indexed serviceId, address indexed consumer, address provider, uint256 amount, string taskDescription);
     event ResultSubmitted(uint256 indexed id, string result);
-    event JobCompleted(uint256 indexed id, uint256 amount);
+    event JobCompleted(uint256 indexed id, uint256 amount, uint256 fee);
     event JobCancelled(uint256 indexed id, address cancelledBy);
     event JobRated(uint256 indexed id, uint256 rating);
 
     constructor(address _registry) {
         registry = ServiceRegistry(_registry);
+        feeRecipient = msg.sender;
     }
 
     function createJob(uint256 _serviceId, string calldata _task) external payable returns (uint256) {
@@ -97,10 +101,7 @@ contract JobEscrow {
         j.status = JobStatus.Completed;
         j.completedAt = block.timestamp;
 
-        (bool sent, ) = payable(j.provider).call{value: j.amount}("");
-        require(sent, "Payment failed");
-
-        emit JobCompleted(_jobId, j.amount);
+        _releasePayout(_jobId);
     }
 
     function rateJob(uint256 _jobId, uint256 _rating) external {
@@ -151,10 +152,7 @@ contract JobEscrow {
         j.status = JobStatus.Completed;
         j.completedAt = block.timestamp;
 
-        (bool sent, ) = payable(j.provider).call{value: j.amount}("");
-        require(sent, "Payment failed");
-
-        emit JobCompleted(_jobId, j.amount);
+        _releasePayout(_jobId);
     }
 
     function getJob(uint256 _jobId) external view returns (
@@ -185,5 +183,22 @@ contract JobEscrow {
 
     function getJobCount() external view returns (uint256) {
         return nextJobId - 1;
+    }
+
+    function _releasePayout(uint256 _jobId) internal {
+        Job storage j = jobs[_jobId];
+        uint256 fee = (j.amount * PROTOCOL_FEE_BPS) / 10000;
+        uint256 payout = j.amount - fee;
+
+        (bool sentProvider, ) = payable(j.provider).call{value: payout}("");
+        require(sentProvider, "Payment failed");
+
+        if (fee > 0) {
+            (bool sentFee, ) = payable(feeRecipient).call{value: fee}("");
+            require(sentFee, "Fee transfer failed");
+            totalFeesCollected += fee;
+        }
+
+        emit JobCompleted(_jobId, payout, fee);
     }
 }

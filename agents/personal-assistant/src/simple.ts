@@ -72,13 +72,21 @@ async function main() {
     const jobId = await ah.hire(selected.id, task);
     console.log(`[Assistant] Job #${jobId} created. Waiting for result...`);
 
-    let job = await ah.getJob(jobId);
-    while (job && job.status === 0) {
-      await new Promise((r) => setTimeout(r, 3000));
-      job = await ah.getJob(jobId);
-      process.stdout.write(".");
-    }
-    console.log("");
+    const job = await new Promise<any>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        ah.escrow.removeAllListeners("ResultSubmitted");
+        reject(new Error("Timeout waiting for result (5 min)"));
+      }, 300000);
+
+      ah.escrow.on("ResultSubmitted", async (id: bigint, _result: string) => {
+        if (Number(id) === jobId) {
+          clearTimeout(timeout);
+          ah.escrow.removeAllListeners("ResultSubmitted");
+          const j = await ah.getJob(jobId);
+          resolve(j);
+        }
+      });
+    });
 
     if (!job || job.status === 3) {
       console.log("[Assistant] Job cancelled.\n");

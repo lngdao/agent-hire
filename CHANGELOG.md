@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.1] - 2026-02-23
+
+### Security
+- `ServiceRegistry.incrementJobCount()` and `addRating()` now restricted with `onlyEscrow` modifier — prevents fake job counts and ratings from arbitrary callers
+- Added `owner`, `escrow` state variables and `setEscrow()` function to ServiceRegistry
+- Deploy script now calls `registry.setEscrow(escrowAddress)` after deployment
+
+### Added
+- Protocol fee: 2% (200 bps) deducted on `confirmComplete` and `claimTimeout`, sent to `feeRecipient` (deployer)
+- `totalFeesCollected` tracking on JobEscrow
+- `JobCompleted` event now includes `fee` parameter
+- 4 new tests: onlyEscrow access control, setEscrow validation, protocol fee tracking (38 total)
+
+### Changed
+- PersonalAssistant agents now use `ResultSubmitted` event listener instead of polling `getJob()` every 3s — cleaner and fewer RPC calls
+
 ## [0.1.0] - 2026-02-23
 
 ### Added
@@ -48,6 +64,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Technical Decisions
 - Solidity 0.8.24 with `viaIR` compiler (required for nested calldata array storage)
 - ethers.js v6 throughout SDK and agents
-- No access control on `incrementJobCount`/`addRating` (MVP limitation — production needs `onlyEscrow` modifier)
+- No access control on `incrementJobCount`/`addRating` — fixed in 0.1.1
 - Tag index not cleaned on deactivation — filtered client-side in SDK
 - ETH-only payments (ERC-20 support planned for V1.5)

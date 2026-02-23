@@ -21,6 +21,10 @@ async function main() {
   const escrowAddress = await escrow.getAddress();
   console.log("JobEscrow deployed to:", escrowAddress);
 
+  // Link registry → escrow (access control)
+  await registry.setEscrow(escrowAddress);
+  console.log("ServiceRegistry.escrow set to:", escrowAddress);
+
   // Save deployment addresses
   const deployments = {
     network: (await ethers.provider.getNetwork()).name,

@@ -8,6 +8,7 @@ describe("JobEscrow", function () {
   let escrow: JobEscrow;
   let deployer: any, provider: any, consumer: any, other: any;
   const PRICE = ethers.parseEther("0.001");
+  const FEE_BPS = 200n; // 2%
 
   beforeEach(async function () {
     [deployer, provider, consumer, other] = await ethers.getSigners();
@@ -17,6 +18,9 @@ describe("JobEscrow", function () {
 
     const EscrowFactory = await ethers.getContractFactory("JobEscrow");
     escrow = await EscrowFactory.deploy(await registry.getAddress());
+
+    // Link registry → escrow for access control
+    await registry.setEscrow(await escrow.getAddress());
 
     // Register a service
     await registry.connect(provider).registerService(
@@ -85,16 +89,26 @@ describe("JobEscrow", function () {
       await escrow.connect(provider).submitResult(1, '{"txHash":"0xabc"}');
     });
 
-    it("should complete and release payment", async function () {
+    it("should complete and release payment with fee", async function () {
+      const fee = (PRICE * FEE_BPS) / 10000n;
+      const payout = PRICE - fee;
+
       const providerBalBefore = await ethers.provider.getBalance(provider.address);
+      const deployerBalBefore = await ethers.provider.getBalance(deployer.address);
+
       const tx = await escrow.connect(consumer).confirmComplete(1);
-      await expect(tx).to.emit(escrow, "JobCompleted").withArgs(1, PRICE);
+      await expect(tx).to.emit(escrow, "JobCompleted").withArgs(1, payout, fee);
 
       const j = await escrow.getJob(1);
       expect(j.status).to.equal(2); // Completed
 
+      // Provider gets payout (amount - fee)
       const providerBalAfter = await ethers.provider.getBalance(provider.address);
-      expect(providerBalAfter - providerBalBefore).to.equal(PRICE);
+      expect(providerBalAfter - providerBalBefore).to.equal(payout);
+
+      // Fee recipient (deployer) gets fee
+      const deployerBalAfter = await ethers.provider.getBalance(deployer.address);
+      expect(deployerBalAfter - deployerBalBefore).to.be.greaterThan(0);
     });
 
     it("should reject non-consumer confirmation", async function () {
@@ -185,9 +199,8 @@ describe("JobEscrow", function () {
       ).to.be.revertedWith("Must wait 24 hours to claim");
     });
 
-    it("should allow provider claim after 24h", async function () {
+    it("should allow provider claim after 24h with fee", async function () {
       await time.increase(86401); // 24h + 1s
-      const providerBalBefore = await ethers.provider.getBalance(provider.address);
       const tx = await escrow.connect(provider).claimTimeout(1);
       await expect(tx).to.emit(escrow, "JobCompleted");
 
@@ -200,6 +213,17 @@ describe("JobEscrow", function () {
       await expect(
         escrow.connect(consumer).claimTimeout(1)
       ).to.be.revertedWith("Not the provider");
+    });
+  });
+
+  describe("protocol fee", function () {
+    it("should track totalFeesCollected", async function () {
+      await escrow.connect(consumer).createJob(1, "task", { value: PRICE });
+      await escrow.connect(provider).submitResult(1, "result");
+      await escrow.connect(consumer).confirmComplete(1);
+
+      const fee = (PRICE * FEE_BPS) / 10000n;
+      expect(await escrow.totalFeesCollected()).to.equal(fee);
     });
   });
 

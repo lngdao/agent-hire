@@ -2,9 +2,11 @@ export const SERVICE_REGISTRY_ABI = [
   "event ServiceRegistered(uint256 indexed id, address indexed provider, string name, uint256 pricePerJob)",
   "event ServiceUpdated(uint256 indexed id, string name, uint256 pricePerJob)",
   "event ServiceDeactivated(uint256 indexed id)",
+  "event EscrowSet(address indexed escrow)",
   "function registerService(string _name, string _description, string[] _tags, uint256 _pricePerJob) returns (uint256)",
   "function updateService(uint256 _id, string _name, string _description, uint256 _pricePerJob)",
   "function deactivateService(uint256 _id)",
+  "function setEscrow(address _escrow)",
   "function getService(uint256 _id) view returns (uint256 id, address provider, string name, string description, string[] tags, uint256 pricePerJob, bool active, uint256 totalJobs, uint256 totalRating, uint256 ratingCount, uint256 createdAt)",
   "function findByTag(string _tag) view returns (uint256[])",
   "function getProviderServices(address _provider) view returns (uint256[])",
@@ -12,12 +14,14 @@ export const SERVICE_REGISTRY_ABI = [
   "function addRating(uint256 _id, uint256 _rating)",
   "function getServiceCount() view returns (uint256)",
   "function nextServiceId() view returns (uint256)",
+  "function owner() view returns (address)",
+  "function escrow() view returns (address)",
 ];
 
 export const JOB_ESCROW_ABI = [
   "event JobCreated(uint256 indexed id, uint256 indexed serviceId, address indexed consumer, address provider, uint256 amount, string taskDescription)",
   "event ResultSubmitted(uint256 indexed id, string result)",
-  "event JobCompleted(uint256 indexed id, uint256 amount)",
+  "event JobCompleted(uint256 indexed id, uint256 amount, uint256 fee)",
   "event JobCancelled(uint256 indexed id, address cancelledBy)",
   "event JobRated(uint256 indexed id, uint256 rating)",
   "function createJob(uint256 _serviceId, string _task) payable returns (uint256)",

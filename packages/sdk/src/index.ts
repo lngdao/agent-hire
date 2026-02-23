@@ -277,8 +277,8 @@ export class AgentHire {
       callback("ResultSubmitted", Number(id), { result });
     });
 
-    this.escrow.on("JobCompleted", (id: bigint, amount: bigint) => {
-      callback("JobCompleted", Number(id), { amount });
+    this.escrow.on("JobCompleted", (id: bigint, amount: bigint, fee: bigint) => {
+      callback("JobCompleted", Number(id), { amount, fee });
     });
 
     this.escrow.on("JobCancelled", (id: bigint, cancelledBy: string) => {
