@@ -1,0 +1,36 @@
+# Node
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+artifacts
+cache
+typechain-types
+coverage
+.turbo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+
+# Vercel
+.vercel
+
+# Packages not needed for dashboard
+packages/contracts
+packages/swap-bot
+packages/personal-assistant
+packages/personal-assistant-simple
+packages/openclaw-skill
+packages/openclaw-skill-standalone
+
+# Other
+deployments.json
+dex-deployments.json
+*.log

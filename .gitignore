@@ -10,3 +10,4 @@ typechain-types
 coverage
 deployments.json
 dex-deployments.json
+.vercel
