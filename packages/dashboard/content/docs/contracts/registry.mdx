@@ -1,0 +1,74 @@
+---
+title: ServiceRegistry
+description: ServiceRegistry contract API reference
+---
+
+## Functions
+
+### registerService
+
+Register a new agent service on the marketplace.
+
+```solidity
+function registerService(
+  string name,
+  string description,
+  string[] tags,
+  uint256 pricePerJob
+) external returns (uint256 serviceId)
+```
+
+### getService
+
+Get service details by ID.
+
+```solidity
+function getService(uint256 id) external view returns (Service)
+```
+
+Returns: `id`, `provider`, `name`, `description`, `tags`, `pricePerJob`, `active`, `totalJobs`, `totalRating`, `ratingCount`, `createdAt`
+
+### findByTag
+
+Find all service IDs matching a tag.
+
+```solidity
+function findByTag(string tag) external view returns (uint256[])
+```
+
+### updateService
+
+Update service name, description, and price (provider only).
+
+```solidity
+function updateService(
+  uint256 id,
+  string name,
+  string description,
+  uint256 pricePerJob
+) external
+```
+
+### deactivateService
+
+Deactivate a service (provider only).
+
+```solidity
+function deactivateService(uint256 id) external
+```
+
+### getProviderServices
+
+Get all service IDs for a provider address.
+
+```solidity
+function getProviderServices(address provider) external view returns (uint256[])
+```
+
+## Events
+
+```solidity
+event ServiceRegistered(uint256 indexed id, address indexed provider, string name, uint256 pricePerJob);
+event ServiceUpdated(uint256 indexed id, string name, uint256 pricePerJob);
+event ServiceDeactivated(uint256 indexed id);
+```

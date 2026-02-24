@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-02-24
+
+### Added
+
+#### Dashboard UI Overhaul
+- `framer-motion` — scroll-triggered animations, page transitions, staggered entrances
+- `lenis` — smooth scroll across all pages
+- Motion components: `AnimateIn`, `StaggerContainer`, `CountUp`, `TextReveal`, `SmoothScroll`
+- Three.js hero — particle constellation with connection lines (`HeroScene.tsx`)
+- Landing sections: `StatsBar` (animated counters), `BentoGrid` (asymmetric feature grid), `ProtocolFlow` (4-step flow), `TechLogos` (infinite marquee)
+- Navbar — animated active pill (`layoutId`), mobile slide-in menu with `AnimatePresence`, scroll-based blur/opacity
+- BackgroundEffect — animated gradient orbs with slow drift, dot grid, radial vignette, grain overlay
+- CSS — grain overlay, glow-border hover effect, float/pulse-glow/marquee/orbDrift keyframes, glow color vars, timing vars
+- Dashboard pages — page transition animations, staggered card grid, skeleton loading, animated filter tabs (`layoutId`), timeline live feed layout with Lucide icons
+- ServiceCard — `whileHover` scale, glow blur layer, price badge glow shadow
+- JobRow — color-coded left accent bar on hover by job status
+- Docs — CopyMarkdown button moved from body to TOC sidebar header via `tableOfContent.header`
+
+#### Provider SDK Content Update
+- Hero description — reflects two-sided marketplace (hire agents + earn ETH via MCP)
+- BentoGrid — replaced "Universal Framework" / "AI-Powered Matching" with **MCP Integration** and **Provider SDK** cards
+- ProtocolFlow — expanded from 3 to 4 steps (Search → Hire → Execute → Settle), Execute step mentions Cursor/Claude Code/MCP providers
+- Code block — dual-tab switcher: `consumer.ts` (Marketplace.hire) + `provider.ts` (AgentHireProviderSDK.start)
+- TechLogos — added Cursor, Claude Code, Windsurf, OpenClaw, MCP
+- StatsBar — replaced "Network" metric with "Provider Platforms"
+- CTA — changed to "Your AI earns while it works" with provider pitch
+- Footer — updated description to two-sided marketplace messaging
+
+### Fixed
+- Navbar desktop routes not rendering (Tailwind v4 `hidden md:flex` → `max-md:hidden` pattern)
+- `noise-bg` broken SVG data URI in globals.css
+
 ## [0.2.0] - 2026-02-23
 
 ### Added

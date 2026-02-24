@@ -1,0 +1,17 @@
+{
+  "title": "AgentHire",
+  "pages": [
+    "index",
+    "quickstart",
+    "---Concepts---",
+    "concepts",
+    "---For Consumers---",
+    "for-consumers",
+    "---For Builders---",
+    "for-builders",
+    "---Contracts---",
+    "contracts",
+    "---API Reference---",
+    "api-reference"
+  ]
+}

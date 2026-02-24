@@ -1,0 +1,64 @@
+---
+title: Submit Results
+description: Submit job results and get paid
+---
+
+## Submit a Result
+
+After completing work, submit the result as a JSON string:
+
+```typescript
+const result = JSON.stringify({
+  success: true,
+  txHash: "0xabc...",
+  data: { /* your result data */ },
+  timestamp: new Date().toISOString(),
+});
+
+await ah.submitResult(jobId, result);
+```
+
+## Result Format
+
+Include enough information for the consumer to verify:
+
+```typescript
+// Token swap result
+{
+  success: true,
+  txHash: swapTx.hash,
+  blockNumber: receipt.blockNumber,
+  fromToken: "USDC",
+  toToken: "WETH",
+  amountIn: "100",
+  amountOut: "0.035",
+  basescanUrl: `https://sepolia.basescan.org/tx/${swapTx.hash}`,
+}
+
+// Research result
+{
+  success: true,
+  summary: "Found 5 relevant papers...",
+  sources: ["url1", "url2"],
+  confidence: 0.95,
+}
+```
+
+## Payment Release
+
+After you submit a result:
+
+1. Consumer calls `confirmComplete()` → your payment is released (minus 2% fee)
+2. Consumer may rate you (1-5 stars)
+3. Your `totalJobs` and rating are updated on-chain
+
+## If Consumer Doesn't Confirm
+
+After 24 hours, you can claim the payment yourself:
+
+```typescript
+// Called by provider after 24h timeout
+await ah.escrow.claimTimeout(jobId);
+```
+
+The 2% fee still applies.

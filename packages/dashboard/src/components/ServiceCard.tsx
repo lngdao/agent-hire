@@ -1,36 +1,50 @@
+"use client";
+import { motion } from "framer-motion";
 import { Service } from "@agenthire/sdk";
 import { formatEth } from "@/lib/utils";
 
 export function ServiceCard({ service }: { service: Service }) {
   return (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-5 hover:border-blue-500/30 transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="text-lg font-semibold text-white">{service.name}</h3>
-        <span className="text-sm font-mono text-blue-400">
-          {formatEth(service.pricePerJob)}
-        </span>
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="group relative cursor-pointer overflow-hidden rounded-3xl border border-white/[0.06] bg-white/[0.03] p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors duration-500 hover:border-white/[0.15]"
+    >
+      {/* Glow layer on hover */}
+      <div className="pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br from-indigo-500/15 via-cyan-500/10 to-transparent opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-400/5 via-cyan-400/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+      <div className="relative z-10">
+        <div className="mb-6 flex items-start justify-between">
+          <h3 className="text-xl font-semibold tracking-tight text-white">
+            {service.name}
+          </h3>
+          <div className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 font-mono text-xs font-semibold text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.15)]">
+            {formatEth(service.pricePerJob)}
+          </div>
+        </div>
+        <p className="mb-8 line-clamp-2 text-sm font-light leading-relaxed text-neutral-400">
+          {service.description}
+        </p>
+        <div className="mb-8 flex flex-wrap gap-2">
+          {service.tags.map((tag) => (
+            <TagBadge key={tag} tag={tag} />
+          ))}
+        </div>
+        <div className="flex items-center justify-between border-t border-white/[0.06] pt-5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+          <RatingStars rating={service.avgRating} count={service.ratingCount} />
+          <span>
+            {service.totalJobs} job{service.totalJobs !== 1 ? "s" : ""} filled
+          </span>
+        </div>
       </div>
-      <p className="text-dark-muted text-sm mb-4 line-clamp-2">
-        {service.description}
-      </p>
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {service.tags.map((tag) => (
-          <TagBadge key={tag} tag={tag} />
-        ))}
-      </div>
-      <div className="flex items-center justify-between text-sm">
-        <RatingStars rating={service.avgRating} count={service.ratingCount} />
-        <span className="text-dark-muted">
-          {service.totalJobs} job{service.totalJobs !== 1 ? "s" : ""}
-        </span>
-      </div>
-    </div>
+    </motion.div>
   );
 }
 
 export function TagBadge({ tag }: { tag: string }) {
   return (
-    <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+    <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-xs font-medium text-violet-200">
       {tag}
     </span>
   );
@@ -45,13 +59,12 @@ export function RatingStars({
 }) {
   if (count === 0)
     return <span className="text-dark-muted text-xs">No ratings</span>;
-  const stars = "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
+  const stars =
+    "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
   return (
-    <span className="text-yellow-400 text-sm">
+    <span className="text-sm text-yellow-300">
       {stars}{" "}
-      <span className="text-dark-muted text-xs">
-        ({rating.toFixed(1)})
-      </span>
+      <span className="text-xs text-neutral-500">({rating.toFixed(1)})</span>
     </span>
   );
 }
@@ -66,7 +79,7 @@ export function StatusBadge({ status }: { status: number }) {
   ];
   return (
     <span
-      className={`px-2 py-0.5 rounded-md text-xs font-medium border ${colors[status] || ""}`}
+      className={`rounded-full border px-2.5 py-1 text-xs font-medium ${colors[status] || ""}`}
     >
       {labels[status] || "Unknown"}
     </span>

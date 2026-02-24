@@ -31,28 +31,35 @@ async function main() {
   const dexAddress = await dex.getAddress();
   console.log("SimpleDEX deployed to:", dexAddress);
 
-  // Mint tokens for testing
+  // Mint tokens for testing (await each TX for testnet compatibility)
   console.log("\nMinting tokens...");
 
   // Mint 1,000,000 USDC to deployer
-  await usdc.mint(deployer.address, ethers.parseUnits("1000000", 6));
+  const tx1 = await usdc.mint(deployer.address, ethers.parseUnits("1000000", 6));
+  await tx1.wait();
   console.log("Minted 1,000,000 USDC to deployer");
 
   // Mint 1,000 WETH to deployer
-  await weth.mint(deployer.address, ethers.parseUnits("1000", 18));
+  const tx2 = await weth.mint(deployer.address, ethers.parseUnits("1000", 18));
+  await tx2.wait();
   console.log("Minted 1,000 WETH to deployer");
 
   // Add liquidity to DEX
   console.log("\nAdding liquidity to DEX...");
-  await usdc.approve(dexAddress, ethers.parseUnits("500000", 6));
-  await weth.approve(dexAddress, ethers.parseUnits("500", 18));
-  await dex.addLiquidity(usdcAddress, ethers.parseUnits("500000", 6));
-  await dex.addLiquidity(wethAddress, ethers.parseUnits("500", 18));
+  const tx3 = await usdc.approve(dexAddress, ethers.parseUnits("500000", 6));
+  await tx3.wait();
+  const tx4 = await weth.approve(dexAddress, ethers.parseUnits("500", 18));
+  await tx4.wait();
+  const tx5 = await dex.addLiquidity(usdcAddress, ethers.parseUnits("500000", 6));
+  await tx5.wait();
+  const tx6 = await dex.addLiquidity(wethAddress, ethers.parseUnits("500", 18));
+  await tx6.wait();
   console.log("Added 500,000 USDC + 500 WETH liquidity to DEX");
 
-  // Mint 10,000 USDC to SwapBot wallet (Hardhat account #1)
-  const swapBotAddress = process.env.SWAPBOT_ADDRESS || swapBotWallet.address;
-  await usdc.mint(swapBotAddress, ethers.parseUnits("10000", 6));
+  // Mint 10,000 USDC to SwapBot wallet
+  const swapBotAddress = process.env.SWAPBOT_ADDRESS || (swapBotWallet ? swapBotWallet.address : deployer.address);
+  const tx7 = await usdc.mint(swapBotAddress, ethers.parseUnits("10000", 6));
+  await tx7.wait();
   console.log(`Minted 10,000 USDC to SwapBot wallet (${swapBotAddress})`);
 
   // Save deployment addresses

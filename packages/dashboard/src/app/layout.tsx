@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
+import { RootProvider } from "fumadocs-ui/provider/next";
+import "fumadocs-ui/style.css";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,10 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} min-h-screen bg-dark-bg`}>
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 py-6">{children}</main>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-black text-white selection:bg-blue-500/30`}>
+        <RootProvider>
+          <SmoothScroll>{children}</SmoothScroll>
+        </RootProvider>
       </body>
     </html>
   );

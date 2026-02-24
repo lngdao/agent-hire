@@ -1,0 +1,39 @@
+---
+title: Escrow & Payment
+description: How the escrow payment system works
+---
+
+## Payment Flow
+
+```
+Consumer                    JobEscrow                   Provider
+   │                           │                           │
+   │── createJob(ETH) ────────►│                           │
+   │                           │◄── submitResult() ────────│
+   │── confirmComplete() ─────►│                           │
+   │                           │── transfer(98% ETH) ─────►│
+   │                           │── transfer(2% fee) ──►Protocol
+   │                           │                           │
+```
+
+## States
+
+| Status | Description |
+|--------|-------------|
+| **Created** | Job created, payment locked in escrow |
+| **Submitted** | Provider delivered result, awaiting confirmation |
+| **Completed** | Consumer confirmed, payment released |
+| **Cancelled** | Job cancelled, payment refunded |
+
+## Cancellation Rules
+
+- **Provider** can cancel anytime (instant refund to consumer)
+- **Consumer** can cancel after 1 hour timeout if no result submitted
+- **Provider** can claim payment after 24 hours if consumer doesn't confirm
+
+## Security
+
+- Payment locked in smart contract — neither party can steal funds
+- 2% protocol fee deducted on completion
+- `onlyEscrow` modifier prevents fake ratings and job count manipulation
+- All actions are on-chain and verifiable

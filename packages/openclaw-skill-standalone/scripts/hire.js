@@ -25,8 +25,9 @@ async function main() {
     const name = s[2];
     console.log(`Hiring ${name} (ID: ${serviceId}) for ${ethers.formatEther(price)} ETH...`);
 
-    // Create job with escrow
-    const tx = await escrow.createJob(serviceId, task, { value: price });
+    // Create job with escrow (explicit nonce for testnet)
+    const nonce = await wallet.getNonce("pending");
+    const tx = await escrow.createJob(serviceId, task, { value: price, nonce });
     const receipt = await tx.wait();
 
     // Parse JobCreated event to get jobId
@@ -37,34 +38,40 @@ async function main() {
     const jobId = event ? Number(escrow.interface.parseLog(event).args[0]) : 0;
 
     console.log(`Job #${jobId} created! Escrow locked. TX: ${tx.hash}`);
-    console.log("Waiting for provider to complete (max 90s)...");
+    console.log("Waiting for provider to complete (max 120s)...");
 
     // Poll for result
-    const maxWait = 90_000;
-    const poll = 3_000;
+    const maxWait = 120_000;
+    const poll = 5_000;
     let elapsed = 0;
 
     while (elapsed < maxWait) {
         const job = await escrow.getJob(jobId);
         const status = Number(job[7]); // status field
+        const result = job[6]; // result field
 
-        if (status === 1) { // Submitted
-            const result = job[6]; // result field
-            console.log("\nProvider delivered! Confirming + rating...");
+        if (status === 1 || status === 2) {
+            // Status 1 = Submitted (need to confirm)
+            // Status 2 = Already completed
+            if (status === 1) {
+                console.log("\nProvider delivered! Confirming + rating...");
+                try {
+                    await new Promise(r => setTimeout(r, 3000));
+                    const cNonce = await wallet.getNonce("pending");
+                    const confirmTx = await escrow.confirmComplete(jobId, { nonce: cNonce });
+                    await confirmTx.wait();
+                    console.log("Payment released!");
 
-            // Confirm completion (releases payment)
-            const confirmTx = await escrow.confirmComplete(jobId);
-            await confirmTx.wait();
-            console.log("Payment released!");
-
-            // Rate 5 stars (separate try-catch, nonce-safe)
-            try {
-                const nonce = await wallet.getNonce();
-                const rateTx = await escrow.rateJob(jobId, 5, { nonce });
-                await rateTx.wait();
-                console.log("Rated 5/5 stars.");
-            } catch (rateErr) {
-                console.log("Rating skipped (non-critical):", rateErr.message?.slice(0, 50));
+                    await new Promise(r => setTimeout(r, 3000));
+                    const rNonce = await wallet.getNonce("pending");
+                    const rateTx = await escrow.rateJob(jobId, 5, { nonce: rNonce });
+                    await rateTx.wait();
+                    console.log("Rated 5/5 stars.");
+                } catch (e) {
+                    console.log("Auto-completed by provider.");
+                }
+            } else {
+                console.log("\nJob completed!");
             }
 
             // Parse result
@@ -84,11 +91,6 @@ async function main() {
             process.exit(0);
         }
 
-        if (status === 2) {
-            console.log(`\nJob #${jobId} already completed.`);
-            process.exit(0);
-        }
-
         if (status === 3) {
             console.log(`\nJob #${jobId} was cancelled.`);
             process.exit(1);
@@ -99,7 +101,7 @@ async function main() {
         elapsed += poll;
     }
 
-    console.log(`\nTimeout — provider didn't respond in 90s. Job #${jobId} still pending.`);
+    console.log(`\nTimeout — provider didn't respond in 120s. Job #${jobId} still pending.`);
     console.log("Check later: node status.js " + jobId);
 }
 

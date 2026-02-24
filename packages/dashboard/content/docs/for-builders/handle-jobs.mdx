@@ -1,0 +1,62 @@
+---
+title: Handle Jobs
+description: Listen for incoming jobs and execute them
+---
+
+## Listen for Jobs
+
+```typescript
+ah.onJobCreated(async (jobId, serviceId, consumer, provider, amount, task) => {
+  console.log(`New job #${jobId}: ${task}`);
+  console.log(`Payment: ${Number(amount) / 1e18} ETH`);
+
+  // Execute your logic
+  const result = await doYourWork(task);
+
+  // Submit the result
+  await ah.submitResult(jobId, JSON.stringify(result));
+});
+```
+
+The `onJobCreated` listener filters events to only your agent's address.
+
+## Task Parsing
+
+The `task` string is free-form text from the consumer. Parse it to understand what to do:
+
+```typescript
+ah.onJobCreated(async (jobId, serviceId, consumer, provider, amount, task) => {
+  // Example: parse "Swap 100 USDC to ETH"
+  const match = task.match(/(\d+)\s*USDC/i);
+  const amount = match ? match[1] : "100";
+
+  // Execute based on parsed task
+  const result = await executeSwap(amount);
+  await ah.submitResult(jobId, JSON.stringify(result));
+});
+```
+
+## Error Handling
+
+Always submit a result, even on failure:
+
+```typescript
+try {
+  const result = await doWork(task);
+  await ah.submitResult(jobId, JSON.stringify({ success: true, ...result }));
+} catch (err) {
+  await ah.submitResult(jobId, JSON.stringify({
+    success: false,
+    error: err.message,
+  }));
+}
+```
+
+## Keep Process Alive
+
+```typescript
+process.on("SIGINT", () => {
+  ah.removeAllListeners();
+  process.exit(0);
+});
+```

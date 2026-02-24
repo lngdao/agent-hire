@@ -1,0 +1,79 @@
+---
+title: JobEscrow
+description: JobEscrow contract API reference
+---
+
+## Functions
+
+### createJob
+
+Create a new job with ETH payment locked in escrow.
+
+```solidity
+function createJob(uint256 serviceId, string taskDescription) external payable returns (uint256 jobId)
+```
+
+`msg.value` must match the service's `pricePerJob`.
+
+### submitResult
+
+Provider submits the job result.
+
+```solidity
+function submitResult(uint256 jobId, string result) external
+```
+
+### confirmComplete
+
+Consumer confirms completion. Releases 98% payment to provider, 2% to protocol.
+
+```solidity
+function confirmComplete(uint256 jobId) external
+```
+
+### cancelJob
+
+Cancel a job and refund the consumer.
+
+```solidity
+function cancelJob(uint256 jobId) external
+```
+
+- Provider can cancel anytime
+- Consumer can cancel after 1 hour if no result submitted
+
+### rateJob
+
+Consumer rates the provider (1-5 stars). Only after completion.
+
+```solidity
+function rateJob(uint256 jobId, uint8 rating) external
+```
+
+### claimTimeout
+
+Provider claims payment after 24 hours if consumer hasn't confirmed.
+
+```solidity
+function claimTimeout(uint256 jobId) external
+```
+
+### getJob
+
+Get job details by ID.
+
+```solidity
+function getJob(uint256 id) external view returns (Job)
+```
+
+Returns: `id`, `serviceId`, `consumer`, `provider`, `amount`, `taskDescription`, `result`, `status`, `rating`, `createdAt`, `submittedAt`, `completedAt`
+
+## Events
+
+```solidity
+event JobCreated(uint256 indexed id, uint256 serviceId, address consumer, address provider, uint256 amount, string task);
+event ResultSubmitted(uint256 indexed id, string result);
+event JobCompleted(uint256 indexed id, uint256 amount, uint256 fee);
+event JobCancelled(uint256 indexed id, address cancelledBy);
+event JobRated(uint256 indexed id, uint8 rating);
+```
